@@ -1,0 +1,79 @@
+name: ci
+
+env:
+  CONFIG_REPO_NAME: hello-python-flask
+  HELM_REPO_NAME: helm-flask-app
+  TEST_TAG: test${{ github.sha }}
+  LATEST_TAG: ${{ github.sha }}
+  IMAGE_NAME: hello-python-flask
+
+on:
+  push:
+    branches:
+      - 'develop'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "building and testing the app ..."
+  docker-build-push:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#      -
+#        name: Build and export to Docker
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          load: true
+#          tags: ${{ env.TEST_TAG }}
+#      -
+#        name: Test
+#        run: |
+#          docker run --rm ${{ env.TEST_TAG }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{env.IMAGE_NAME}}:${{ env.LATEST_TAG }}
+
+  promote-to-dev-environment:
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+    steps:
+      - run: |
+          echo "=== promoting into dev environment! ==="
+          git config --global user.name github-actions &&  git config --global user.email github-actions@github.com
+          echo "=== cloning config repo $HELM_REPO_NAME ==="
+          git clone https://oauth2:${{ secrets.PERSONAL_ACCESS_TOKENS }}@github.com/${{ github.repository_owner }}/${{ env.HELM_REPO_NAME }}.git
+          cd ${{ env.HELM_REPO_NAME }}
+          echo "=== checkout main branch === "
+          git checkout main
+          ls -lrt
+          pwd
+          echo "=== updating image tag in values file ===="
+          sed -i "s,tag:.*,tag:\ ${{ env.LATEST_TAG }}," ./values.yaml
+          echo "=== git add and commit update image tag ===="
+          git add . && git commit -m "update image tag"
+          echo "=== git push code ===="
+          git push
+          echo "=== git push completed ===="

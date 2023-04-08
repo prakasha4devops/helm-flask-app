@@ -8,7 +8,7 @@ image:
   repository: prakash4devops/hello-python-flask
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 06804170d4881f066c704b8603c4366403d1a01d
+  tag: 00c97f548002a001a39197972371ee933c450cdc
 
 imagePullSecrets: []
 nameOverride: ""

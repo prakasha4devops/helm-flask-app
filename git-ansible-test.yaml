@@ -21,9 +21,7 @@
       shell: |
         cd {{ git_local_dir }}
         git checkout -b "{{ new_branch_name }}"
-      args:
-        executable: /bin/bash
-
+  
     - name: Create or modify myfile.txt
       copy:
         dest: "{{ file_path }}"
@@ -34,12 +32,9 @@
         cd {{ git_local_dir }}
         git add .
         git commit -m "{{ commit_message }}"
-      args:
-        executable: /bin/bash
 
     - name: Push changes to Git repository
       shell: |
         cd {{ git_local_dir }}
         git push origin "{{ new_branch_name }}"
-      args:
-        executable: /bin/bash
+  

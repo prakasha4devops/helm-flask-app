@@ -1,0 +1,45 @@
+- name: Clone Git repository, create new branch, commit, and push with username and password authentication
+  hosts: localhost
+  vars:
+    git_local_dir: "./tmp/myrepo"
+    file_path: "{{ git_local_dir }}/myfile.txt"
+    commit_message: "Update myfile.txt"
+    new_branch_name: "mybranch"
+    git_user_name: ""
+    git_user_email: ""
+    git_access_token: ""
+    git_repo: "https://{{ git_access_token }}@github.com/rwnabdevs/hello-world-python-flask.git"
+
+  tasks:
+
+    - name: Clone Git repository
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ git_local_dir }}"
+
+    - name: Create new branch
+      shell: |
+        cd {{ git_local_dir }}
+        git checkout -b "{{ new_branch_name }}"
+      args:
+        executable: /bin/bash
+
+    - name: Create or modify myfile.txt
+      copy:
+        dest: "{{ file_path }}"
+        content: "Hello World!22"
+
+    - name: Commit changes to Git
+      shell: |
+        cd {{ git_local_dir }}
+        git add .
+        git commit -m "{{ commit_message }}"
+      args:
+        executable: /bin/bash
+
+    - name: Push changes to Git repository
+      shell: |
+        cd {{ git_local_dir }}
+        git push origin "{{ new_branch_name }}"
+      args:
+        executable: /bin/bash

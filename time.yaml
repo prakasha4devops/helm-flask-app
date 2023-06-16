@@ -1,0 +1,49 @@
+# ---
+# - name: Get current date and time
+#   hosts: localhost
+#   gather_facts: true
+#   become: false
+
+#   tasks:
+#     - name: Display current date and time
+#       debug:
+#         msg: "Current date and time: {{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+
+#     - name: Calculate 15 minutes before the current time
+#       shell: "date -d '15 minutes ago' +%Y-%m-%d"
+#       register: minute15_date
+
+
+#     - debug:
+#        var: minute15_date.stdout
+
+#     - name: Calculate 15 minutes before the current time
+#       shell: "date -d '15 minutes ago' %m-%d%H"
+#       register: minute15_time
+
+#     - debug:
+#        var: minute15_date.stdout
+
+
+---
+- name: Calculate 15 minutes before current time
+  hosts: localhost
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Display current time
+      debug:
+        msg: "Current time: {{ ansible_date_time.time }}"
+
+    - name: Calculate 15 minutes before time
+      ansible.builtin.set_fact:
+        current_time: "{{ ansible_date_time.time }}"
+        hours: "{{ current_time.split(':')[0] }}"
+        minutes: "{{ current_time.split(':')[1] }}"
+        before_minutes: "{{ minutes|int - 15 }}"
+        before_time: "{{ '%02d:%02d' | format(hours|int, before_minutes|int) }}"
+
+    - name: Display 15 minutes before time
+      debug:
+        msg: "15 minutes before time: {{ before_time }}"

@@ -1,0 +1,40 @@
+---
+- name: Create Jira Ticket
+  hosts: localhost
+  vars:
+    jira_base_url: "https://your-jira-instance.com/rest/api/2"
+    jira_username: "your_jira_username"
+    jira_password: "your_jira_password"
+    jira_project_key: "PROJECT"
+    issue_summary: "New issue created by Ansible"
+    issue_description: "This is the description of the new issue created by Ansible."
+    issue_type: "Task"  # Use the appropriate issue type for your Jira project
+
+  tasks:
+    - name: Create Jira Ticket
+      uri:
+        url: "{{ jira_base_url }}/issue/"
+        method: POST
+        user: "{{ jira_username }}"
+        password: "{{ jira_password }}"
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "fields": {
+              "project": {
+                "key": "{{ jira_project_key }}"
+              },
+              "summary": "{{ issue_summary }}",
+              "description": "{{ issue_description }}",
+              "issuetype": {
+                "name": "{{ issue_type }}"
+              }
+            }
+          }
+      register: jira_response
+
+    - name: Print Jira Response
+      debug:
+        var: jira_response.json

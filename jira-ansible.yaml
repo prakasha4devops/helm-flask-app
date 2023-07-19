@@ -1,0 +1,35 @@
+---
+- name: Create Jira Story
+  hosts: localhost
+  gather_facts: False
+  vars:
+    jira_base_url: "https://your-jira-instance.com"
+    jira_username: "your-jira-username"
+    jira_password: "your-jira-password"
+    project_key: "YOUR_PROJECT_KEY"
+    summary: "Your story summary"
+    description: "Your story description"
+
+  tasks:
+    - name: Create Jira Story
+      uri:
+        url: "{{ jira_base_url }}/rest/api/2/issue/"
+        method: POST
+        user: "{{ jira_username }}"
+        password: "{{ jira_password }}"
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+        body:
+          fields:
+            project:
+              key: "{{ project_key }}"
+            summary: "{{ summary }}"
+            description: "{{ description }}"
+            issuetype:
+              name: "Story"
+      register: jira_response
+
+    - name: Print Jira Story Key
+      debug:
+        msg: "Created Jira Story with key {{ jira_response.json.key }}"

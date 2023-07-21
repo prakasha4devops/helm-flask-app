@@ -1,0 +1,14 @@
+- name: Extract values from JSON fields containing the substring
+  hosts: localhost
+  gather_facts: no
+  vars:
+    my_json_data: '{"field_with_substring": "value1", "another_field_with_substring": "value2", "field_without_substring": "value3"}'
+    substring_to_find: "substring"
+  tasks:
+    - name: Load JSON data into a variable
+      set_fact:
+        my_json_object: "{{ my_json_data | from_json }}"
+
+    - name: Extract values with substring in field name
+      debug:
+        msg: "Value of fields containing '{{ substring_to_find }}': {{ my_json_object | dict2items | selectattr('key', 'search', substring_to_find) | map(attribute='value') | list }}"

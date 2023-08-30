@@ -22,3 +22,26 @@ class TestMyModule(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+---
+- name: Check if pytest is installed
+  hosts: your_target_host
+  tasks:
+    - name: Check if pytest is installed
+      become: true
+      become_method: sudo
+      command: "pip show pytest"
+      ignore_errors: yes
+      register: pytest_output
+
+    - name: Display pytest installation status
+      debug:
+        msg: "Pytest is installed."
+      when: pytest_output.rc == 0
+
+    - name: Display pytest installation status
+      debug:
+        msg: "Pytest is not installed."
+      when: pytest_output.rc != 0
+

@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Get User ID') {
+            steps {
+                script {
+                    def userIdCause = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)
+                    if (userIdCause != null) {
+                        def userId = userIdCause.getUserId()
+                        echo "User ID: $userId"
+                    } else {
+                        echo "Unable to determine the user ID for this build."
+                    }
+                }
+            }
+        }
+        stage('Another Stage') {
+            steps {
+                // Your pipeline steps for this stage
+            }
+        }
+    }
+
+    post {
+        always {
+            // Cleanup or final actions
+        }
+    }
+}
